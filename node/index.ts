@@ -1,7 +1,7 @@
 import { ClientsConfig, ServiceContext, method, Service, LRUCache } from '@vtex/api'
 
 import { Clients } from './clients'
-import { getPost } from './middlewares/getPost'
+import { getPost } from './middlewares/getpost'
 import { methodNotAllowed } from './middlewares/methods'
 
 const TIMEOUT_MS = 10000

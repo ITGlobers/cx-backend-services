@@ -1,5 +1,3 @@
-
-
 export async function getPost(ctx: Context, next: () => Promise<any>) {
   const {
     clients: { getPost },
