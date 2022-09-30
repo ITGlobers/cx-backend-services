@@ -1,6 +1,6 @@
 {
-  "name": "graphql-example",
-  "vendor": "vtex",
+  "name": "cxperu-backend-service",
+  "vendor": "cxperu",
   "version": "0.3.0",
   "title": "GraphQL Example",
   "description": "Reference app for VTEX IO GraphQL Services",
@@ -17,6 +17,13 @@
   },
   "credentialType": "absolute",
   "policies": [
+    {
+      "name": "outbound-access",
+      "attrs": {
+        "host": "https://jsonplaceholder.typicode.com",
+        "path": "/posts/*"
+      }
+    },
     {
       "name": "colossus-fire-event"
     },

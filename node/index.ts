@@ -1,49 +1,47 @@
-import type { ParamsContext, RecorderState, ServiceContext } from '@vtex/api'
-import { Service } from '@vtex/api'
-import { prop } from 'ramda'
+import { ClientsConfig, ServiceContext, method, Service, LRUCache } from '@vtex/api'
 
 import { Clients } from './clients'
-import { book } from './resolvers/book'
-import { books } from './resolvers/books'
-import { deleteBook } from './resolvers/delete'
-import { editBook } from './resolvers/editBook'
-import { newBook } from './resolvers/newBook'
-import { source } from './resolvers/source'
-import { total } from './resolvers/total'
+import { getpost } from './middlewares/getpost'
 
-const MEDIUM_TIMEOUT_MS = 2 * 1000
+const TIMEOUT_MS = 10000
 
-declare global {
-  // We declare a global Context type just to avoid re-writing ServiceContext<Clients, State> in every handler and resolver
-  type Context = ServiceContext<Clients>
+const memoryCache = new LRUCache<string, any>({ max: 5000 })
+metrics.trackCache('status', memoryCache)
+
+// This is the configuration for clients available in `ctx.clients`.
+const clients: ClientsConfig<Clients> = {
+  // We pass our custom implementation of the clients bag, containing the Status client.
+  implementation: Clients,
+  options: {
+    // All IO Clients will be initialized with these options, unless otherwise specified.
+    default: {
+      retries: 2,
+      timeout: TIMEOUT_MS,
+    },
+    status: {
+      memoryCache,
+    }
+  },
 }
 
-// Export a service that defines resolvers and clients' options
-export default new Service<Clients, RecorderState, ParamsContext>({
-  clients: {
-    implementation: Clients,
-    options: {
-      default: {
-        timeout: MEDIUM_TIMEOUT_MS,
-      },
-    },
-  },
-  graphql: {
-    resolvers: {
-      Book: {
-        cacheId: prop('id'),
-      },
-      Mutation: {
-        delete: deleteBook,
-        editBook,
-        newBook,
-      },
-      Query: {
-        book,
-        books,
-        source,
-        total,
-      },
-    },
+declare global {
+  interface State {
+    id: number
+    data: string[]
+  }
+  // We declare a global Context type just to avoid re-writing ServiceContext<Clients, State> in every handler and resolver
+  type Context = ServiceContext<Clients, State>
+
+  // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
+
+}
+
+// Export a service that defines route handlers and client options.
+export default new Service<Clients, State>({
+  clients,
+  routes: {
+    getpost: method({
+      GET: [getpost],
+    })
   },
 })

@@ -3,5 +3,12 @@
   "ttl": 10,
   "timeout": 1,
   "minReplicas": 2,
-  "maxReplicas": 5
+  "maxReplicas": 5,
+  "workers": 1,
+  "routes": {
+    "getpost": {
+      "path": "/_v/blog_api/getpost",
+      "public": true
+    }
+  }
 }
