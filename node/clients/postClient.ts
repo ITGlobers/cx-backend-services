@@ -1,23 +1,40 @@
-import type { InstanceOptions, IOContext } from '@vtex/api'
-import { ExternalClient } from '@vtex/api'
+import { ExternalClient,RequestConfig,InstanceOptions, IOContext } from '@vtex/api'
+import { statusToError } from '../utils';
 
-const FIVE_SECONS_MS  = 5 * 1000
+const FIVE_SECONDS_MS  = 5 * 1000
 
-export default class PostClient extends ExternalClient {
+export class PostClient extends ExternalClient {
   public constructor(context: IOContext, options?: InstanceOptions) {
-
-    super('https://jsonplaceholder.typicode.com', context, {
+    super( 'https://jsonplaceholder.typicode.com', context, {
       ...options,
-      headers: {
-        ...(options && options.headers)
-      },
-      timeout: FIVE_SECONS_MS
+      timeout: FIVE_SECONDS_MS,
     })
   }
 
-  public async postRequest(): Promise<string> {
-    return this.http.get('/', {
-      metric: 'get-post',
-    })
+
+  //   super( 'https://jsonplaceholder.typicode.com', {
+  //     ...options,
+  //     headers: {
+  //       ...(options && options.headers),
+  //     },
+  //     timeout: FIVE_SECONDS_MS,
+  //   });
+  // }
+
+  public getPost = () => {
+    return this.get(
+      '/posts',{
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+          'X-Vtex-Use-Https': true,
+          'Access-Control-Allow-Credentials':true,
+      }
+    }
+    )
+  };
+
+  protected get = <T>(url: string, config: RequestConfig = {}) => {
+    return this.http.get<T>(url, config).catch(statusToError) as Promise<T>
   }
 }

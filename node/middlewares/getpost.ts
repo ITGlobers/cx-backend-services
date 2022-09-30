@@ -1,14 +1,21 @@
-export async function getpost(ctx: Context, next: () => Promise<any>) {
+
+
+export async function getPost(ctx: Context, next: () => Promise<any>) {
   const {
     clients: { getPost },
+    headers
   } = ctx
 
-  try {
-    const materials = await getPost.postRequest()
-    ctx.body = materials
-  } catch (error) {
-    ctx.body = error?.response?.data || error
-  }
+  const data = await getPost.getPost()
+console.log(data);
 
-  await next()
+  ctx.set("Cache-control", headers["cache-control"]);
+  ctx.status = 200;
+  ctx.body = {
+    message:  data
+  };
+
+  await next();
+
+
 }

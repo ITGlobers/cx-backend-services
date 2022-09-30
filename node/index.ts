@@ -1,7 +1,8 @@
 import { ClientsConfig, ServiceContext, method, Service, LRUCache } from '@vtex/api'
 
 import { Clients } from './clients'
-import { getpost } from './middlewares/getpost'
+import { getPost } from './middlewares/getPost'
+import { methodNotAllowed } from './middlewares/methods'
 
 const TIMEOUT_MS = 10000
 
@@ -18,9 +19,6 @@ const clients: ClientsConfig<Clients> = {
       retries: 2,
       timeout: TIMEOUT_MS,
     },
-    status: {
-      memoryCache,
-    }
   },
 }
 
@@ -30,18 +28,19 @@ declare global {
     data: string[]
   }
   // We declare a global Context type just to avoid re-writing ServiceContext<Clients, State> in every handler and resolver
-  type Context = ServiceContext<Clients, State>
+  type Context = ServiceContext<Clients>
 
   // The shape of our State object found in `ctx.state`. This is used as state bag to communicate between middlewares.
 
 }
 
 // Export a service that defines route handlers and client options.
-export default new Service<Clients, State>({
+export default new Service({
   clients,
   routes: {
     getpost: method({
-      GET: [getpost],
+      DEFAULT: methodNotAllowed,
+      GET: [getPost],
     })
   },
 })
